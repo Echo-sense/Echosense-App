@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -18,10 +19,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,7 +39,7 @@ import com.google.firebase.appindexing.Indexable;
 import com.google.firebase.appindexing.builders.Actions;
 
 
-
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,10 +76,18 @@ public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
 
-    private final static UUID BT_service_ID = UUID.fromString("0000A000-0000-1000-8000-00805F9B34FB");
-    private final static UUID char_service_ID = UUID.fromString("0000A001-0000-1000-8000-00805F9B34FB");
+    private final static UUID BT_service_ID1 = UUID.fromString("0000a000-0000-1000-8000-00805f9b34fb");
+    private final static UUID char_service_ID1 = UUID.fromString("0000a001-0000-1000-8000-00805f9b34fb");
 
+    private final static UUID BT_service_ID2 = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
+    private final static UUID char_service_ID2 = UUID.fromString("00002a00-0000-1000-8000-00805f9b34fb");
+    private final static UUID char_service_ID3 = UUID.fromString("00002a01-0000-1000-8000-00805f9b34fb");
+    private final static UUID char_service_ID4 = UUID.fromString("00002a04-0000-1000-8000-00805f9b34fb");
 
+    private final static UUID BT_service_ID3 = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
+    private final static UUID char_service_ID5 = UUID.fromString("00002a05-0000-1000-8000-00805f9b34fb");
+
+    private final static UUID desc_ID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     public Map<String, String> uuids = new HashMap<String, String>();
 
     // Stops scanning after 5 seconds.
@@ -159,14 +170,16 @@ public class MainActivity extends AppCompatActivity {
     private ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            peripheralTextView.append("Index: " + deviceIndex + ", Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
-            devicesDiscovered.add(result.getDevice());
-            deviceIndex++;
-            // auto scroll for text view
-            final int scrollAmount = peripheralTextView.getLayout().getLineTop(peripheralTextView.getLineCount()) - peripheralTextView.getHeight();
-            // if there is no need to scroll, scrollAmount will be <=0
-            if (scrollAmount > 0) {
-                peripheralTextView.scrollTo(0, scrollAmount);
+            if(result.getDevice().getName() != null){
+                peripheralTextView.append("Index: " + deviceIndex + ", Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
+                devicesDiscovered.add(result.getDevice());
+                deviceIndex++;
+                // auto scroll for text view
+                final int scrollAmount = peripheralTextView.getLayout().getLineTop(peripheralTextView.getLineCount()) - peripheralTextView.getHeight();
+                // if there is no need to scroll, scrollAmount will be <=0
+                if (scrollAmount > 0) {
+                    peripheralTextView.scrollTo(0, scrollAmount);
+                }
             }
         }
     };
@@ -182,6 +195,18 @@ public class MainActivity extends AppCompatActivity {
                     peripheralTextView.append("device read or wrote to\n");
                 }
             });
+            super.onCharacteristicChanged(gatt, characteristic);
+            byte[] msg = characteristic.getValue();
+            String msgString = null;
+            try
+            {
+                msgString = new String(msg, "UTF-8");
+            }
+            catch(UnsupportedEncodingException e)
+            {
+                peripheralTextView.append("Unable to convert message bytes to string. \n");
+            }
+            peripheralTextView.append("characteristic value is " + msgString + "\n");
         }
 
         @Override
@@ -229,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
                     peripheralTextView.append("device services have been discovered\n");
                 }
             });
+
             displayGattServices(gatt);
 
         }
@@ -240,7 +266,15 @@ public class MainActivity extends AppCompatActivity {
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                byte[] value = characteristic.getValue();
+                final String v = new String(value);
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        peripheralTextView.append("on characteristic read value is: " + v + "\n");
+                    }
+                });
             }
+
         }
     };
 
@@ -325,8 +359,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayGattServices(BluetoothGatt gatt){
-        BluetoothGattService gatt_service = gatt.getService(BT_service_ID);
-        BluetoothGattCharacteristic gatt_char = gatt_service.getCharacteristic(char_service_ID);
+        BluetoothGattService gatt_service = gatt.getService(BT_service_ID1);
+        BluetoothGattCharacteristic gatt_char = gatt_service.getCharacteristic(char_service_ID1);
+
+        final BluetoothGattDescriptor desc = gatt_char.getDescriptor(desc_ID);
+        gatt.readDescriptor(desc);
+        gatt.setCharacteristicNotification(gatt_char, true);
+
+        MainActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                peripheralTextView.append("desc is: "+desc+"\n");
+            }
+        });
+
+        desc.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+        final boolean writeDesc = gatt.writeDescriptor(desc);
+        MainActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                peripheralTextView.append("writeDesc is: "+writeDesc+"\n");
+            }
+        });
+
         final String uuid = gatt_service.getUuid().toString();
         System.out.println("Service discovered: " + uuid);
         MainActivity.this.runOnUiThread(new Runnable() {
@@ -342,13 +395,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        gatt.readCharacteristic(gatt_char);
+
     }
+
 /*
     private void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
 
         // Loops through available GATT Services.
         for (BluetoothGattService gattService : gattServices) {
+
 
             final String uuid = gattService.getUuid().toString();
             System.out.println("Service discovered: " + uuid);
@@ -364,6 +421,14 @@ public class MainActivity extends AppCompatActivity {
             // Loops through available Characteristics.
             for (BluetoothGattCharacteristic gattCharacteristic :
                     gattCharacteristics) {
+                for (final BluetoothGattDescriptor descriptor:gattCharacteristic.getDescriptors()){
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        public void run() {
+                            peripheralTextView.append("BluetoothGattDescriptor: "+descriptor.getUuid().toString()+"\n");
+                        }
+                    });
+                }
+                final byte[] mValue = gattCharacteristic.getValue();
 
                 final String charUuid = gattCharacteristic.getUuid().toString();
                 System.out.println("Characteristic discovered for service: " + charUuid);
@@ -372,12 +437,16 @@ public class MainActivity extends AppCompatActivity {
                         peripheralTextView.append("Characteristic discovered for service: "+charUuid+"\n");
                     }
                 });
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        peripheralTextView.append("Characteristic discovered for service: "+mValue+"\n");
+                    }
+                });
 
             }
         }
     }
-    */
-
+*/
     @Override
     public void onStart() {
         super.onStart();
