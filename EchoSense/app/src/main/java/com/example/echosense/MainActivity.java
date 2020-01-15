@@ -255,8 +255,50 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            displayGattServices(gatt);
+            //displayGattServices(gatt);
+            BluetoothGattService gatt_service = gatt.getService(BT_service_ID1);
+            BluetoothGattCharacteristic gatt_char = gatt_service.getCharacteristic(char_service_ID1);
 
+            gatt.setCharacteristicNotification(gatt_char, true);
+
+            BluetoothGattDescriptor descriptor = gatt_char.getDescriptor(desc_ID);
+            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+
+            gatt.writeDescriptor(descriptor);
+
+            /*
+            final boolean charRead = gatt.readCharacteristic(gatt_char);
+            MainActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    peripheralTextView.append("characteristic read returns: "+charRead+"\n");
+                }
+            });
+
+            final String uuid = gatt_service.getUuid().toString();
+            System.out.println("Service discovered: " + uuid);
+            MainActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    peripheralTextView.append("Service disovered: "+uuid+"\n");
+                }
+            });
+            final String charUuid = gatt_char.getUuid().toString();
+            System.out.println("Characteristic discovered for service: " + charUuid);
+            MainActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    peripheralTextView.append("Characteristic discovered for service: "+charUuid+"\n");
+                }
+            });
+        */
+
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status){
+            BluetoothGattService gatt_service = gatt.getService(BT_service_ID1);
+            BluetoothGattCharacteristic gatt_char = gatt_service.getCharacteristic(char_service_ID1);
+
+            gatt_char.setValue(new byte[]{1, 1});
+            gatt.writeCharacteristic(gatt_char);
         }
 
         @Override
@@ -276,6 +318,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+
     };
 
     private void broadcastUpdate(final String action,
@@ -358,29 +401,49 @@ public class MainActivity extends AppCompatActivity {
         bluetoothGatt.disconnect();
     }
 
+    public void setCharacteristicNotification(BluetoothGattCharacteristic character, boolean enabled){
+        bluetoothGatt.setCharacteristicNotification(character, enabled);
+        BluetoothGattDescriptor descriptor = character.getDescriptor(desc_ID);
+        descriptor.setValue(enabled?BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE:BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+        bluetoothGatt.writeDescriptor(descriptor);
+    }
+
     private void displayGattServices(BluetoothGatt gatt){
         BluetoothGattService gatt_service = gatt.getService(BT_service_ID1);
         BluetoothGattCharacteristic gatt_char = gatt_service.getCharacteristic(char_service_ID1);
 
+       // setCharacteristicNotification(gatt_char, true);
+
         //get descriptor from characteristic above using pre-defined descriptor UUID.
-        final BluetoothGattDescriptor desc = gatt_char.getDescriptor(desc_ID);
+        //final BluetoothGattDescriptor desc = gatt_char.getDescriptor(desc_ID);
         //read Descriptor, should return either true or false -> theoretically should trigger onDescriptorRead and subscribe to ble service and update every time characteristic changes.
-        gatt.readDescriptor(desc);
+        //gatt.readDescriptor(desc);
         //set ble notification using the descriptor
-        gatt.setCharacteristicNotification(gatt_char, true);
+
         //prints descriptor
+        /*
         MainActivity.this.runOnUiThread(new Runnable() {
             public void run() {
                 peripheralTextView.append("desc is: "+desc+"\n");
             }
         });
+         */
         //set descriptor value, either ENABLE_INDICATION_VALUE or ENABLE_NOTIFICATION_VALUE.
-        desc.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+        //desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        //desc.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
         //write back to descriptor.
-        final boolean writeDesc = gatt.writeDescriptor(desc);
+        //final boolean writeDesc = gatt.writeDescriptor(desc);
+        /*
         MainActivity.this.runOnUiThread(new Runnable() {
             public void run() {
                 peripheralTextView.append("writeDesc is: "+writeDesc+"\n");
+            }
+        });
+*/
+        final boolean charRead = gatt.readCharacteristic(gatt_char);
+        MainActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                peripheralTextView.append("characteristic read returns: "+charRead+"\n");
             }
         });
 
@@ -399,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        gatt.readCharacteristic(gatt_char);
+        //gatt.readCharacteristic(gatt_char);
 
     }
 
