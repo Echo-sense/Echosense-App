@@ -19,6 +19,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     Button disconnectDevice;
     BluetoothGatt bluetoothGatt;
 
+
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
@@ -93,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
     // Stops scanning after 5 seconds.
     private Handler mHandler = new Handler();
     private static final long SCAN_PERIOD = 5000;
+
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -196,7 +202,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             super.onCharacteristicChanged(gatt, characteristic);
+            final MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.noti);
             byte[] msg = characteristic.getValue();
+
+            System.out.println("length is " + msg.length);
+            for(int i=0; i< msg.length; ++i){
+                int cInt = msg[i];
+                System.out.println("msg[" + i + "] is: " + cInt);
+            }
+            int charInt = msg[0] & 0xFF;
+            if(charInt == 1){
+                mp.start();
+            }
+            else{
+                mp.stop();
+            }
+            //float charFloat = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
+            //System.out.println(charInt);
+            //String charString = Float.toString(charFloat);
+            /*
             String msgString = null;
             try
             {
@@ -206,7 +230,8 @@ public class MainActivity extends AppCompatActivity {
             {
                 peripheralTextView.append("Unable to convert message bytes to string. \n");
             }
-            peripheralTextView.append("characteristic value is " + msgString + "\n");
+             */
+            //peripheralTextView.append("characteristic value is " + msg + "\n");
         }
 
         @Override
@@ -266,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
 
             gatt.writeDescriptor(descriptor);
 
+
             /*
             final boolean charRead = gatt.readCharacteristic(gatt_char);
             MainActivity.this.runOnUiThread(new Runnable() {
@@ -297,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
             BluetoothGattService gatt_service = gatt.getService(BT_service_ID1);
             BluetoothGattCharacteristic gatt_char = gatt_service.getCharacteristic(char_service_ID1);
 
-            gatt_char.setValue(new byte[]{1, 1});
+            //gatt_char.setValue(new byte[]{1, 1});
             gatt.writeCharacteristic(gatt_char);
         }
 
