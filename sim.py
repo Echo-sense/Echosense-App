@@ -49,8 +49,17 @@ class App(object):
         self.distance = []
 
         #ADD LIDAR LINES HERE, left to right
+        # define line segments, from base to whereever
         self.lasers = [(self.base, (0, 600)),
+                       (self.base, (0,800)),
+                       (self.base, (0,1000)),
+                       (self.base, (300, 1000)),
+                       
                       (self.base, (600, 1000)),
+
+                       (self.base, (900, 1000)),
+                       (self.base, (1200,1000)),
+                       (self.base, (1200, 800)),
                       (self.base, (1200,600))]
 
         
@@ -58,7 +67,7 @@ class App(object):
             self.canvas.create_line(dims[0][0], dims[0][1], dims[1][0], dims[1][1])
             self.distance.append(10000)
         
-        self.things = [thingy1(self.canvas, 1,1,300,600)]
+        self.things = [thingy1(self.canvas, 2,2,300,600)]
         
         self.canvas.pack()
         self.master.after(0,self.animation)
@@ -85,7 +94,7 @@ class App(object):
     def compareDistance(self, curframe):
         for x in range(len(curframe)):
             #CHANGE THIS AFTER MORE LASERS
-            if (curframe[x] < self.distance[x]):
+            if (curframe[x] < self.distance[x] and self.distance[x]-curframe[x] < 1000):
                 self.canvas.itemconfig(self.me, fill='red')
                 
 
@@ -99,24 +108,6 @@ class App(object):
         self.distance = currentframe
         self.master.after(10,self.animation)
 
-
-    
-
-
-#def intersects(line1, line2):
-#    xdif = ( line1[0][0]-line1[1][0] , line2[0][0]-line2[1][0] )
-#    ydif = ( line1[0][1]-line1[1][1] , line2[0][1]-line2[1][1] )
-
-#    def det(dif1,dif2):
-#        return dif1[0] * dif2[1] - dif1[1]*dif2[0]
-#    
-#    res = det(xdif, ydif)
-#    if res == 0:
-#        return 10000
-#    d = (det(*line1), det(*line2))
-#    x = det(d,xdif) / res
-#    y = det(d,ydif) / res
-#    return (x,y)
     
 
     
