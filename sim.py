@@ -51,15 +51,47 @@ class App(object):
         #ADD LIDAR LINES HERE, left to right
         # define line segments, from base to whereever
         self.lasers = [(self.base, (0, 600)),
+                       (self.base, (0,650)),
+                       (self.base, (0,700)),
+                       (self.base, (0,750)),
                        (self.base, (0,800)),
+                       (self.base, (0,850)),
+                       (self.base, (0,900)),
+                        (self.base, (0,950)),
                        (self.base, (0,1000)),
+                       (self.base, (50,1000)),
+                       (self.base, (100, 1000)),
+                       (self.base, (150, 1000)),
+                       (self.base, (200, 1000)),
+                       (self.base, (250, 1000)),
                        (self.base, (300, 1000)),
+                       (self.base, (350, 1000)),
+                       (self.base, (400, 1000)),
+                       (self.base, (450, 1000)),
+                       (self.base, (500, 1000)),
+                       (self.base, (550, 1000)),
                        
                       (self.base, (600, 1000)),
 
+                        (self.base, (650,1000)),
+                       (self.base, (700, 1000)),
+                       (self.base, (750, 1000)),
+                       (self.base, (800, 1000)),
+                       (self.base, (850, 1000)),
                        (self.base, (900, 1000)),
-                       (self.base, (1200,1000)),
+                       (self.base, (950, 1000)),
+                       (self.base, (1000, 1000)),
+                       (self.base, (1050, 1000)),
+                       (self.base, (1100, 1000)),
+                       (self.base, (1150,1000)),
+                       (self.base, (1200, 1000)),
+                       (self.base, (1200, 950)),
+                       (self.base, (1200, 900)),
+                       (self.base, (1200, 850)),
                        (self.base, (1200, 800)),
+                       (self.base, (1200, 750)),
+                       (self.base, (1200, 700)),
+                       (self.base, (1200, 650)),
                       (self.base, (1200,600))]
 
         
@@ -67,7 +99,8 @@ class App(object):
             self.canvas.create_line(dims[0][0], dims[0][1], dims[1][0], dims[1][1])
             self.distance.append(10000)
         
-        self.things = [thingy1(self.canvas, 2,2,300,600)]
+        #add obstacles here if necessary
+        self.things = [thingy1(self.canvas, 2,2,300,600), thingy1(self.canvas, 3, 1, 300,300)]
         
         self.canvas.pack()
         self.master.after(0,self.animation)
@@ -84,7 +117,8 @@ class App(object):
                     if (ic == (-1,-1)):
                         tempd = 10000
                     else:
-                        tempd = math.sqrt((self.base[0] - ic[0])**2 + (self.base[1]-ic[1])**2)
+                        #tempd = math.sqrt((self.base[0] - ic[0])**2 + (self.base[1]-ic[1])**2)
+                        tempd = ic[1] - self.base[1]
                     #print(tempd)
                     if tempd < mindist:
                         mindist = tempd
@@ -96,6 +130,11 @@ class App(object):
             #CHANGE THIS AFTER MORE LASERS
             if (curframe[x] < self.distance[x] and self.distance[x]-curframe[x] < 1000):
                 self.canvas.itemconfig(self.me, fill='red')
+
+
+    #IDEA FOR NEW ALGORITHM
+                #just care about the x-coordinates, if the object is approaching in y dir
+                #then alert
                 
 
     #moves the GUI by one frame and makes calculations, calls itself when it's done
