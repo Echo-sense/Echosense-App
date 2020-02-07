@@ -35,6 +35,7 @@ class thingy1(object):
         return [((x1, y1),(x2, y1)),((x1,y1),(x1,y2)),((x2,y1),(x2,y2)),((x1,y2),(x2,y2))]
 
 
+
 class App(object):
     def __init__(self,master):
         self.master = master
@@ -94,13 +95,16 @@ class App(object):
                        (self.base, (1200, 650)),
                       (self.base, (1200,600))]
 
-        
+
         for dims in self.lasers:
             self.canvas.create_line(dims[0][0], dims[0][1], dims[1][0], dims[1][1])
+            #self.distance.append(10000)
+
+        for x in range(20):
             self.distance.append(10000)
         
         #add obstacles here if necessary
-        self.things = [thingy1(self.canvas, 2,2,300,600), thingy1(self.canvas, 3, 1, 300,300)]
+        self.things = [thingy1(self.canvas, 2,2,300,600)]#, thingy1(self.canvas, 3, 1, 300,300)]
         
         self.canvas.pack()
         self.master.after(0,self.animation)
@@ -108,8 +112,12 @@ class App(object):
     #determines distance from object if there is one in field of view
     def scan(self):
         disArray = []
+        for x in range(20):
+            disArray.append(10000)    
+        
         for laser in self.lasers:
             mindist = 10000
+            xIntersect = -1
             for obj in self.things: #for each object
                 sides = obj.givesides()
                 for side in sides: #for each side of the object
@@ -119,10 +127,14 @@ class App(object):
                     else:
                         #tempd = math.sqrt((self.base[0] - ic[0])**2 + (self.base[1]-ic[1])**2)
                         tempd = ic[1] - self.base[1]
-                    #print(tempd)
                     if tempd < mindist:
                         mindist = tempd
-            disArray.append(mindist)
+                        xIntersect = ic[0]
+            #disArray.append(mindist)
+            if (xIntersect != -1):
+                arrayX = int(xIntersect / 60)
+                if disArray[arrayX] > mindist:
+                    disArray[arrayX] = mindist
         return disArray
 
     def compareDistance(self, curframe):
