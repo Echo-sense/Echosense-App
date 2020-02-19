@@ -130,16 +130,33 @@
     android:descendantFocusability="beforeDescendants">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="465dp"
         android:layout_height="wrap_content"
-        android:text="Hello Bluetooth Enthusiasts!" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:gravity="center_horizontal"
+        android:text="Welcome to EchoSense"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <ListView
+        android:id="@+id/ListView"
+        android:layout_width="match_parent"
+        android:layout_height="440dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="0dp" />
 
     <Button
         android:id="@+id/StartScanButton"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="7dp"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:text="Scan" />
 
@@ -147,43 +164,27 @@
         android:id="@+id/StopScanButton"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="257dp"
         android:layout_marginTop="40dp"
+        android:layout_centerHorizontal="true"
         android:text="Stop Scanning" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="100dp"
-        android:layout_marginBottom="80dp"
-        android:id="@+id/PeripheralTextView"
-        android:scrollbars="vertical"
-        android:maxLines="30" />
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connect to device with index: "
-        android:id="@+id/ConnectButton"
-        android:layout_alignParentBottom="true"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Disconnect from device"
         android:id="@+id/DisconnectButton"
-        android:layout_alignParentBottom="true"/>
-
-    <EditText
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:singleLine="true"
-        android:cursorVisible="false"
-        android:id="@+id/InputIndex"
-        android:inputType="number"
-        android:paddingLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/textviewborder"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="4dp"
+        android:text="Disconnect from device" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="458dp"
+        android:layout_height="204dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="70dp"
+        android:gravity="center"
+        android:textSize="36sp" />
 
 </RelativeLayout>

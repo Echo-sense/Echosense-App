@@ -29,8 +29,11 @@ import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.AppIndex;
@@ -56,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
     BluetoothLeScanner btScanner;
     Button startScanningButton;
     Button stopScanningButton;
-    TextView peripheralTextView;
+    ListView scanListView;
+    TextView statusTextView = null;
+    ArrayList<String> stringArrayList = new ArrayList<>();
+    //TextView peripheralTextView;
+    ArrayAdapter<String> arrayAdapter;
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
@@ -64,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     int deviceIndex = 0;
     ArrayList<BluetoothDevice> devicesDiscovered = new ArrayList<BluetoothDevice>();
     EditText deviceIndexInput;
-    Button connectToDevice;
+    //Button connectToDevice;
     Button disconnectDevice;
     BluetoothGatt bluetoothGatt;
 
@@ -110,17 +117,33 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        peripheralTextView = (TextView) findViewById(R.id.PeripheralTextView);
-        peripheralTextView.setMovementMethod(new ScrollingMovementMethod());
-        deviceIndexInput = (EditText) findViewById(R.id.InputIndex);
-        deviceIndexInput.setText("0");
+        //peripheralTextView = (TextView) findViewById(R.id.PeripheralTextView);
+        //peripheralTextView.setMovementMethod(new ScrollingMovementMethod());
+        //deviceIndexInput = (EditText) findViewById(R.id.InputIndex);
+        //deviceIndexInput.setText("0");
 
-        connectToDevice = (Button) findViewById(R.id.ConnectButton);
+        //connectToDevice = (Button) findViewById(R.id.ConnectButton);
+        /*
         connectToDevice.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 connectToDeviceSelected();
             }
         });
+
+         */
+
+        scanListView = findViewById(R.id.ListView);
+        arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1, stringArrayList);
+        scanListView.setAdapter(arrayAdapter);
+        scanListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("index at " + position);
+                connectToDeviceSelected(position);
+                disconnectDevice.setVisibility(View.VISIBLE);
+            }
+        });
+        statusTextView = findViewById(R.id.textView);
 
         disconnectDevice = (Button) findViewById(R.id.DisconnectButton);
         disconnectDevice.setVisibility(View.INVISIBLE);
@@ -177,15 +200,20 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             if(result.getDevice().getName() != null){
-                peripheralTextView.append("Index: " + deviceIndex + ", Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
+                //peripheralTextView.append("Index: " + deviceIndex + ", Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
                 devicesDiscovered.add(result.getDevice());
                 deviceIndex++;
+                stringArrayList.add(result.getDevice().getName());
+                arrayAdapter.notifyDataSetChanged();
                 // auto scroll for text view
-                final int scrollAmount = peripheralTextView.getLayout().getLineTop(peripheralTextView.getLineCount()) - peripheralTextView.getHeight();
+                //final int scrollAmount = peripheralTextView.getLayout().getLineTop(peripheralTextView.getLineCount()) - peripheralTextView.getHeight();
                 // if there is no need to scroll, scrollAmount will be <=0
+                /*
                 if (scrollAmount > 0) {
                     peripheralTextView.scrollTo(0, scrollAmount);
                 }
+
+                 */
             }
         }
     };
@@ -198,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
             // this will get called anytime you perform a read or write characteristic operation
             MainActivity.this.runOnUiThread(new Runnable() {
                 public void run() {
-                    peripheralTextView.append("device read or wrote to\n");
+                    //peripheralTextView.append("device read or wrote to\n");
                 }
             });
             super.onCharacteristicChanged(gatt, characteristic);
@@ -217,21 +245,6 @@ public class MainActivity extends AppCompatActivity {
             else{
                 mp.stop();
             }
-            //float charFloat = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
-            //System.out.println(charInt);
-            //String charString = Float.toString(charFloat);
-            /*
-            String msgString = null;
-            try
-            {
-                msgString = new String(msg, "UTF-8");
-            }
-            catch(UnsupportedEncodingException e)
-            {
-                peripheralTextView.append("Unable to convert message bytes to string. \n");
-            }
-             */
-            //peripheralTextView.append("characteristic value is " + msg + "\n");
         }
 
         @Override
@@ -242,18 +255,18 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     MainActivity.this.runOnUiThread(new Runnable() {
                         public void run() {
-                            peripheralTextView.append("device disconnected\n");
-                            connectToDevice.setVisibility(View.VISIBLE);
-                            disconnectDevice.setVisibility(View.INVISIBLE);
+                            statusTextView.setText("device disconnected\n");
+                            //connectToDevice.setVisibility(View.VISIBLE);
+                            //disconnectDevice.setVisibility(View.INVISIBLE);
                         }
                     });
                     break;
                 case 2:
                     MainActivity.this.runOnUiThread(new Runnable() {
                         public void run() {
-                            peripheralTextView.append("device connected\n");
-                            connectToDevice.setVisibility(View.INVISIBLE);
-                            disconnectDevice.setVisibility(View.VISIBLE);
+                            statusTextView.setText("device connected\n");
+                            //connectToDevice.setVisibility(View.INVISIBLE);
+                            //disconnectDevice.setVisibility(View.VISIBLE);
                         }
                     });
 
@@ -264,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 default:
                     MainActivity.this.runOnUiThread(new Runnable() {
                         public void run() {
-                            peripheralTextView.append("we encounterned an unknown state, uh oh\n");
+                            //peripheralTextView.append("we encounterned an unknown state, uh oh\n");
                         }
                     });
                     break;
@@ -276,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
             // this will get called after the client initiates a 			BluetoothGatt.discoverServices() call
             MainActivity.this.runOnUiThread(new Runnable() {
                 public void run() {
-                    peripheralTextView.append("device services have been discovered\n");
+                    statusTextView.setText("EchoSense is ready to use\n");
                 }
             });
 
@@ -290,32 +303,6 @@ public class MainActivity extends AppCompatActivity {
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 
             gatt.writeDescriptor(descriptor);
-
-
-            /*
-            final boolean charRead = gatt.readCharacteristic(gatt_char);
-            MainActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    peripheralTextView.append("characteristic read returns: "+charRead+"\n");
-                }
-            });
-
-            final String uuid = gatt_service.getUuid().toString();
-            System.out.println("Service discovered: " + uuid);
-            MainActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    peripheralTextView.append("Service disovered: "+uuid+"\n");
-                }
-            });
-            final String charUuid = gatt_char.getUuid().toString();
-            System.out.println("Characteristic discovered for service: " + charUuid);
-            MainActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    peripheralTextView.append("Characteristic discovered for service: "+charUuid+"\n");
-                }
-            });
-        */
-
         }
 
         @Override
@@ -338,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
                 final String v = new String(value);
                 MainActivity.this.runOnUiThread(new Runnable() {
                     public void run() {
-                        peripheralTextView.append("on characteristic read value is: " + v + "\n");
+                        //peripheralTextView.append("on characteristic read value is: " + v + "\n");
                     }
                 });
             }
@@ -383,8 +370,10 @@ public class MainActivity extends AppCompatActivity {
         btScanning = true;
         deviceIndex = 0;
         devicesDiscovered.clear();
-        peripheralTextView.setText("");
-        peripheralTextView.append("Started Scanning\n");
+        stringArrayList.clear();
+        arrayAdapter.clear();
+        //peripheralTextView.setText("");
+        //peripheralTextView.append("Started Scanning\n");
         startScanningButton.setVisibility(View.INVISIBLE);
         stopScanningButton.setVisibility(View.VISIBLE);
         AsyncTask.execute(new Runnable() {
@@ -404,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void stopScanning() {
         System.out.println("stopping scanning");
-        peripheralTextView.append("Stopped Scanning\n");
+        //peripheralTextView.append("Stopped Scanning\n");
         btScanning = false;
         startScanningButton.setVisibility(View.VISIBLE);
         stopScanningButton.setVisibility(View.INVISIBLE);
@@ -416,14 +405,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void connectToDeviceSelected() {
-        peripheralTextView.append("Trying to connect to device at index: " + deviceIndexInput.getText() + "\n");
-        int deviceSelected = Integer.parseInt(deviceIndexInput.getText().toString());
+    public void connectToDeviceSelected(int deviceSelected) {
+        statusTextView.setText("Connecting to device... " + "\n");
+        //int deviceSelected = Integer.parseInt(deviceIndexInput.getText().toString());
         bluetoothGatt = devicesDiscovered.get(deviceSelected).connectGatt(this, false, btleGattCallback);
     }
 
     public void disconnectDeviceSelected() {
-        peripheralTextView.append("Disconnecting from device\n");
+        //peripheralTextView.append("Disconnecting from device\n");
         bluetoothGatt.disconnect();
     }
 
@@ -469,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
         final boolean charRead = gatt.readCharacteristic(gatt_char);
         MainActivity.this.runOnUiThread(new Runnable() {
             public void run() {
-                peripheralTextView.append("characteristic read returns: "+charRead+"\n");
+                //peripheralTextView.append("characteristic read returns: "+charRead+"\n");
             }
         });
 
@@ -477,14 +466,14 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Service discovered: " + uuid);
         MainActivity.this.runOnUiThread(new Runnable() {
             public void run() {
-                peripheralTextView.append("Service disovered: "+uuid+"\n");
+                //peripheralTextView.append("Service disovered: "+uuid+"\n");
             }
         });
         final String charUuid = gatt_char.getUuid().toString();
         System.out.println("Characteristic discovered for service: " + charUuid);
         MainActivity.this.runOnUiThread(new Runnable() {
             public void run() {
-                peripheralTextView.append("Characteristic discovered for service: "+charUuid+"\n");
+                //peripheralTextView.append("Characteristic discovered for service: "+charUuid+"\n");
             }
         });
 
