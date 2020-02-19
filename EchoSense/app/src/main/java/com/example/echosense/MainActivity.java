@@ -117,21 +117,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //peripheralTextView = (TextView) findViewById(R.id.PeripheralTextView);
-        //peripheralTextView.setMovementMethod(new ScrollingMovementMethod());
-        //deviceIndexInput = (EditText) findViewById(R.id.InputIndex);
-        //deviceIndexInput.setText("0");
-
-        //connectToDevice = (Button) findViewById(R.id.ConnectButton);
-        /*
-        connectToDevice.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                connectToDeviceSelected();
-            }
-        });
-
-         */
-
         scanListView = findViewById(R.id.ListView);
         arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1, stringArrayList);
         scanListView.setAdapter(arrayAdapter);
@@ -205,15 +190,6 @@ public class MainActivity extends AppCompatActivity {
                 deviceIndex++;
                 stringArrayList.add(result.getDevice().getName());
                 arrayAdapter.notifyDataSetChanged();
-                // auto scroll for text view
-                //final int scrollAmount = peripheralTextView.getLayout().getLineTop(peripheralTextView.getLineCount()) - peripheralTextView.getHeight();
-                // if there is no need to scroll, scrollAmount will be <=0
-                /*
-                if (scrollAmount > 0) {
-                    peripheralTextView.scrollTo(0, scrollAmount);
-                }
-
-                 */
             }
         }
     };
@@ -427,34 +403,6 @@ public class MainActivity extends AppCompatActivity {
         BluetoothGattService gatt_service = gatt.getService(BT_service_ID1);
         BluetoothGattCharacteristic gatt_char = gatt_service.getCharacteristic(char_service_ID1);
 
-       // setCharacteristicNotification(gatt_char, true);
-
-        //get descriptor from characteristic above using pre-defined descriptor UUID.
-        //final BluetoothGattDescriptor desc = gatt_char.getDescriptor(desc_ID);
-        //read Descriptor, should return either true or false -> theoretically should trigger onDescriptorRead and subscribe to ble service and update every time characteristic changes.
-        //gatt.readDescriptor(desc);
-        //set ble notification using the descriptor
-
-        //prints descriptor
-        /*
-        MainActivity.this.runOnUiThread(new Runnable() {
-            public void run() {
-                peripheralTextView.append("desc is: "+desc+"\n");
-            }
-        });
-         */
-        //set descriptor value, either ENABLE_INDICATION_VALUE or ENABLE_NOTIFICATION_VALUE.
-        //desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        //desc.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-        //write back to descriptor.
-        //final boolean writeDesc = gatt.writeDescriptor(desc);
-        /*
-        MainActivity.this.runOnUiThread(new Runnable() {
-            public void run() {
-                peripheralTextView.append("writeDesc is: "+writeDesc+"\n");
-            }
-        });
-*/
         final boolean charRead = gatt.readCharacteristic(gatt_char);
         MainActivity.this.runOnUiThread(new Runnable() {
             public void run() {
@@ -477,91 +425,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //gatt.readCharacteristic(gatt_char);
-
     }
 
-/*
-    private void displayGattServices(List<BluetoothGattService> gattServices) {
-        if (gattServices == null) return;
-
-        // Loops through available GATT Services.
-        for (BluetoothGattService gattService : gattServices) {
-
-
-            final String uuid = gattService.getUuid().toString();
-            System.out.println("Service discovered: " + uuid);
-            MainActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    peripheralTextView.append("Service disovered: "+uuid+"\n");
-                }
-            });
-            new ArrayList<HashMap<String, String>>();
-            List<BluetoothGattCharacteristic> gattCharacteristics =
-                    gattService.getCharacteristics();
-
-            // Loops through available Characteristics.
-            for (BluetoothGattCharacteristic gattCharacteristic :
-                    gattCharacteristics) {
-                for (final BluetoothGattDescriptor descriptor:gattCharacteristic.getDescriptors()){
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            peripheralTextView.append("BluetoothGattDescriptor: "+descriptor.getUuid().toString()+"\n");
-                        }
-                    });
-                }
-                final byte[] mValue = gattCharacteristic.getValue();
-
-                final String charUuid = gattCharacteristic.getUuid().toString();
-                System.out.println("Characteristic discovered for service: " + charUuid);
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    public void run() {
-                        peripheralTextView.append("Characteristic discovered for service: "+charUuid+"\n");
-                    }
-                });
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    public void run() {
-                        peripheralTextView.append("Characteristic discovered for service: "+mValue+"\n");
-                    }
-                });
-
-            }
-        }
-    }
-*/
     @Override
     public void onStart() {
         super.onStart();
-
-//        client.connect();
-//        Action viewAction = Action.(
-//                Action.TYPE_VIEW, // TODO: choose an action type.
-//                "Main Page", // TODO: Define a title for the content shown.
-//                // TODO: If you have web page content that matches this app activity's content,
-//                // make sure this auto-generated web page URL is correct.
-//                // Otherwise, set the URL to null.
-//                Uri.parse("http://host/path"),
-//                // TODO: Make sure this auto-generated app URL is correct.
-//                Uri.parse("android-app://com.example.joelwasserman.androidbleconnectexample/http/host/path")
-//        );
-//        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
     public void onStop() {
-
-/*        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.example.joelwasserman.androidbleconnectexample/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();*/
         super.onStop();
     }
 }
